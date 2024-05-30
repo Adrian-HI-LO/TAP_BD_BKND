@@ -6,7 +6,7 @@ form.addEventListener('submit', async (e) => {
     const formData = new FormData(form);
     const nombre = formData.get('Nombre');
     try {
-        const response = await fetch('http://localhost:3000/', {
+        const response = await fetch('https://tap-bd.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ form.addEventListener('submit', async (e) => {
 
 async function getUserList() {
     try {
-        const response = await fetch('http://localhost:3000/');
+        const response = await fetch('https://tap-bd.onrender.com');
         const data = await response.json();
         console.log(data);
         renderUserList(data);
@@ -58,7 +58,7 @@ async function updateUser() {
     const Nombre = prompt('Ingrese el nuevo nombre:');
     if (!Nombre) return;
     try {
-        const response = await fetch('http://localhost:3000/', {
+        const response = await fetch('https://tap-bd.onrender.com', {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ async function deleteUser() {
     const ID = deleteSelect.value;
     if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
     try {
-        const response = await fetch('http://localhost:3000/', {
+        const response = await fetch('https://tap-bd.onrender.com', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
