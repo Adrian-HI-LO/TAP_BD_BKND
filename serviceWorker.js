@@ -30,3 +30,12 @@ if ( "serviceWorker" in navigator ) {
 // .then() para manejar promesas, async awayt o callbacks
 
 // Como recuperar una peticion: con un fetch (  )
+
+
+// Uso de una base de Datos
+// Responsivo (Buena presentacion en un telefono y en una PC (media query (@media en CSS)))
+// PWA
+// Entrega el 21 de Junio
+// Manual de Practicas
+// Hacer un Chat o una galeria tipo Pinterest
+     // Examen 13 de Junio teorico ese mismo dia revisa firmas.
