@@ -1,98 +1,92 @@
-const form = document.getElementById('userForm');
-const userList = document.getElementById('userList');
+const loginForm = document.getElementById('loginForm');
+const messageForm = document.getElementById('messageForm');
+const receiverSelect = document.getElementById('receiverSelect');
+const chat = document.getElementById('chat');
+let currentUser;
 
-form.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
+    const formData = new FormData(loginForm);
     const nombre = formData.get('Nombre');
+    const password = formData.get('Password');
     try {
-        const response = await fetch('https://tap-bd.onrender.com', {
+        const response = await fetch('http://localhost:3000/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ Nombre: nombre })
+            body: JSON.stringify({ Nombre: nombre, Password: password })
         });
         const data = await response.json();
-        console.log(data);
-        getUserList();
+        if (data.ID) {
+            currentUser = data;
+            loginForm.style.display = 'none';
+            messageForm.style.display = 'block';
+            loadUsers();
+            loadMessages();
+        } else {
+            alert(data.message);
+        }
     } catch (error) {
         console.error(error);
     }
 });
 
-async function getUserList() {
+async function loadUsers() {
     try {
-        const response = await fetch('https://tap-bd.onrender.com');
-        const data = await response.json();
-        console.log(data);
-        renderUserList(data);
+        const response = await fetch('http://localhost:3000/users');
+        const users = await response.json();
+        receiverSelect.innerHTML = ''; // Limpiar el select
+        users.forEach(user => {
+            if (user.ID !== currentUser.ID) {
+                const option = document.createElement('option');
+                option.value = user.ID;
+                option.textContent = user.Nombre;
+                receiverSelect.appendChild(option);
+            }
+        });
     } catch (error) {
         console.error(error);
     }
 }
 
-function renderUserList(users) {
-    userList.innerHTML = '';
-    updateSelect.innerHTML = '';
-    deleteSelect.innerHTML = '';
+messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(messageForm);
+    const message = formData.get('Mensaje');
+    const receiverID = receiverSelect.value;
+    try {
+        const response = await fetch('http://localhost:3000/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ senderID: currentUser.ID, receiverID: receiverID, message: message })
+        });
+        const data = await response.json();
+        console.log(data);
+        loadMessages();
+    } catch (error) {
+        console.error(error);
+    }
+});
 
-    users.forEach(user => {
+async function loadMessages() {
+    const receiverID = receiverSelect.value;
+    try {
+        const response = await fetch(`http://localhost:3000/messages?senderID=${currentUser.ID}&receiverID=${receiverID}`);
+        const data = await response.json();
+        renderMessages(data);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function renderMessages(messages) {
+    chat.innerHTML = '';
+    messages.forEach(msg => {
         const div = document.createElement('div');
-        div.textContent = user.Nombre;
-        userList.appendChild(div);
-
-        const updateOption = document.createElement('option');
-        updateOption.textContent = user.Nombre;
-        updateOption.value = user.ID;
-        updateSelect.appendChild(updateOption);
-
-        const deleteOption = document.createElement('option');
-        deleteOption.textContent = user.Nombre;
-        deleteOption.value = user.ID;
-        deleteSelect.appendChild(deleteOption);
+        div.textContent = `${msg.senderID === currentUser.ID ? 'Tú' : 'Otro'}: ${msg.message}`;
+        chat.appendChild(div);
     });
 }
-async function updateUser() {
-    const ID = updateSelect.value;
-    const Nombre = prompt('Ingrese el nuevo nombre:');
-    if (!Nombre) return;
-    try {
-        const response = await fetch('https://tap-bd.onrender.com', {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ ID, Nombre })
-        });
-        const data = await response.json();
-        console.log(data);
-        getUserList();
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-async function deleteUser() {
-    const ID = deleteSelect.value;
-    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
-    try {
-        const response = await fetch('https://tap-bd.onrender.com', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ ID })
-        });
-        const data = await response.json();
-        console.log(data);
-        getUserList();
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-getUserList();
-
-// codio del profe
-
